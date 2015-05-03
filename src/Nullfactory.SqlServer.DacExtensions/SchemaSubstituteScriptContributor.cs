@@ -91,11 +91,11 @@ namespace Nullfactory.SqlServer.DacExtensions
 
                         string statementScript = string.Empty;
                         domStep.ScriptGenerator.GenerateScript(sqlStatement, out statementScript);
-
                         Debug.WriteLine("Original: " + sqlStatement);
 
                         sqlStatement.Accept(new OverrideSchemaVisitor(oldSchemaName, newSchemaName));
 
+                        domStep.ScriptGenerator.GenerateScript(sqlStatement, out statementScript);
                         Debug.WriteLine("Modified: " + sqlStatement);
                     }
                 }
