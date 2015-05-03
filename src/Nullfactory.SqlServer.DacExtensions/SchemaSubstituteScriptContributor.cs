@@ -11,11 +11,32 @@ namespace Nullfactory.SqlServer.DacExtensions
     using Microsoft.SqlServer.Dac.Deployment;
     using Microsoft.SqlServer.TransactSql.ScriptDom;
 
-    [ExportDeploymentPlanModifier("Nullfactory.SqlServer.DacExtensions.SchemaSubstituteScriptContributor", "1.0.0.0")]
+    /// <summary>
+    /// Schema Substitute Script Contributor
+    /// </summary>
+    [ExportDeploymentPlanModifier("Nullfactory.SchemaSubstitute", "1.0.0.0")]
     public class SchemaSubstituteScriptContributor : DeploymentPlanModifier
     {
+        /// <summary>
+        /// Called by the deployment engine to allow custom contributors to execute their unique tasks
+        /// </summary>
+        /// <param name="context">A <see cref="T:Microsoft.SqlServer.Dac.Deployment.DeploymentContributorContext" /> object</param>
         protected override void OnExecute(DeploymentPlanContributorContext context)
         {
+            // Initialize the command arguments
+            string oldSchemaName = "dbo";
+            string newSchemaName = "$TenantSchema";
+
+            if (context.Arguments.ContainsKey("Nullfactory.SchemaSubstitute.OldSchemaName"))
+            {
+                context.Arguments.TryGetValue("Nullfactory.SchemaSubstitute.OldSchemaName", out oldSchemaName);
+            }
+
+            if (context.Arguments.ContainsKey("Nullfactory.SchemaSubstitute.NewSchemaName"))
+            {
+                context.Arguments.TryGetValue("Nullfactory.SchemaSubstitute.NewSchemaName", out newSchemaName);
+            }
+
             DeploymentStep nextStep = context.PlanHandle.Head;
 
             BeginPreDeploymentScriptStep beforePreDeploy = null;
@@ -39,7 +60,6 @@ namespace Nullfactory.SqlServer.DacExtensions
                 {
                     continue;
                 }
-
 
                 if (beforePreDeploy == null)
                 {
@@ -74,7 +94,7 @@ namespace Nullfactory.SqlServer.DacExtensions
 
                         Debug.WriteLine("Original: " + sqlStatement);
 
-                        sqlStatement.Accept(new OverrideSchemaVisitor());
+                        sqlStatement.Accept(new OverrideSchemaVisitor(oldSchemaName, newSchemaName));
 
                         Debug.WriteLine("Modified: " + sqlStatement);
                     }

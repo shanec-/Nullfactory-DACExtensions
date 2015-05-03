@@ -20,6 +20,27 @@ namespace Nullfactory.SqlServer.DacExtensions
     public class OverrideSchemaVisitor : TSqlFragmentVisitor
     {
         /// <summary>
+        /// The old schema name
+        /// </summary>
+        private string oldSchemaName = string.Empty;
+
+        /// <summary>
+        /// The new schema name
+        /// </summary>
+        private string newSchemaName = string.Empty;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OverrideSchemaVisitor"/> class.
+        /// </summary>
+        /// <param name="oldSchemaName">Old name of the schema.</param>
+        /// <param name="newSchemaName">New name of the schema.</param>
+        public OverrideSchemaVisitor(string oldSchemaName, string newSchemaName)
+        {
+            this.oldSchemaName = oldSchemaName;
+            this.newSchemaName = newSchemaName;
+        }
+
+        /// <summary>
         /// Explicit visit the foreign key constraint definition node.
         /// </summary>
         /// <param name="node">The node.</param>
@@ -52,7 +73,11 @@ namespace Nullfactory.SqlServer.DacExtensions
         /// <param name="node">The node.</param>
         public override void Visit(ForeignKeyConstraintDefinition node)
         {
-            node.ReferenceTableName.SchemaIdentifier.Value = "$TenantSchema";
+            if (node.ReferenceTableName.SchemaIdentifier.Value == this.oldSchemaName)
+            {
+                node.ReferenceTableName.SchemaIdentifier.Value = this.newSchemaName;
+            }
+
             base.Visit(node);
         }
 
@@ -62,7 +87,11 @@ namespace Nullfactory.SqlServer.DacExtensions
         /// <param name="node">The node.</param>
         public override void Visit(AlterTableStatement node)
         {
-            node.SchemaObjectName.SchemaIdentifier.Value = "$TenantSchema";
+            if (node.SchemaObjectName.SchemaIdentifier.Value == this.oldSchemaName)
+            {
+                node.SchemaObjectName.SchemaIdentifier.Value = this.newSchemaName;
+            }
+
             base.Visit(node);
         }
 
@@ -72,7 +101,11 @@ namespace Nullfactory.SqlServer.DacExtensions
         /// <param name="node">The node.</param>
         public override void Visit(CreateTableStatement node)
         {
-            node.SchemaObjectName.SchemaIdentifier.Value = "$TenantSchema";
+            if (node.SchemaObjectName.SchemaIdentifier.Value == this.oldSchemaName)
+            {
+                node.SchemaObjectName.SchemaIdentifier.Value = this.newSchemaName;
+            }
+
             base.Visit(node);
         }
     }

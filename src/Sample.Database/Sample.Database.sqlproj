@@ -57,8 +57,11 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <PropertyGroup>
     <DeploymentContributors>
-      $(DeploymentContributors);Nullfactory.SqlServer.DacExtensions.SchemaSubstituteScriptContributor
+      $(DeploymentContributors);Nullfactory.SchemaSubstitute
     </DeploymentContributors>
+    <ContributorArguments Condition="'$(Configuration)' == 'Debug'">
+      $(ContributorArguments);Nullfactory.SchemaSubstitute.OldSchemaName=dbo;Nullfactory.SchemaSubstitute.NewSchemaName=$TenantSchema;
+    </ContributorArguments>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -68,5 +71,11 @@
   <ItemGroup>
     <Build Include="dbo\Tables\Account.sql" />
     <Build Include="dbo\Tables\Contact.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="TenantSchema">
+      <DefaultValue>dbo</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
   </ItemGroup>
 </Project>
